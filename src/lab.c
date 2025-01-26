@@ -1,4 +1,5 @@
 #include "lab.h"
+#include <stdio.h>
 
 list_t* list_init(void (*destroy_data)(void*), int (*compare_to)(const void*, const void*))
 {
@@ -20,14 +21,17 @@ list_t* list_init(void (*destroy_data)(void*), int (*compare_to)(const void*, co
 void list_destroy(list_t** ptr)
 {
     list_t* list = *ptr;
-
+    
     // Destroy all user-added nodes
     for(size_t i=0; i < list->size; i++) 
     {
         free(list_remove_index(list, i));
     }
-    free(list->head); // Free sentinel
-    free(list);
+
+    // Free sentinel and list
+    free((*ptr)->head);
+    free(*ptr);
+    *ptr = NULL;
 }
 
 list_t* list_add(list_t* list, void* data)
