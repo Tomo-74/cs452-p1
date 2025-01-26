@@ -40,7 +40,6 @@ void tearDown(void) {
   list_destroy(&lst_);
 }
 
-
 void test_create_destroy(void)
 {
   list_t *lst = NULL;
@@ -59,7 +58,6 @@ void test_create_destroy(void)
   list_destroy(&lst);
   TEST_ASSERT_TRUE(lst == NULL);
 }
-
 
 void test_add1(void)
 {
@@ -93,6 +91,70 @@ void test_add2(void)
   TEST_ASSERT_TRUE(*((int *)lst_->head->prev->data) == 1);
 }
 
+void test_add3(void)
+{
+  list_add(lst_, alloc_data(1));
+  TEST_ASSERT_TRUE(lst_->size == 1);
+  list_add(lst_, alloc_data(2));
+  TEST_ASSERT_TRUE(lst_->size == 2);
+  list_add(lst_, alloc_data(3));
+  TEST_ASSERT_TRUE(lst_->size == 3);
+  //With three nodes both next and prev should NOT be equal
+  TEST_ASSERT_FALSE(lst_->head->next == lst_->head->prev);
+  TEST_ASSERT_TRUE(lst_->head->next->next->next == lst_->head->prev);
+  //Make sure we didn't clobber our sentinel node
+  TEST_ASSERT_FALSE(lst_->head == lst_->head->next);
+  TEST_ASSERT_FALSE(lst_->head == lst_->head->prev);
+  TEST_ASSERT_TRUE(lst_->head->data == NULL);
+  //Check to make sure we have the correct data
+  TEST_ASSERT_TRUE(*((int *)lst_->head->next->data) == 3);
+  TEST_ASSERT_TRUE(*((int *)lst_->head->next->next->data) == 2);
+  TEST_ASSERT_TRUE(*((int *)lst_->head->prev->data) == 1);
+  
+}
+
+void test_add1_destroy(void)
+{
+  list_t *lst = NULL;
+  lst = list_init(destroy_data, compare_to);
+  list_add(lst, alloc_data(1));
+  TEST_ASSERT_TRUE(lst->size == 1);
+  //With one node both next and prev should be equal
+  TEST_ASSERT_TRUE(lst->head->next == lst->head->prev);
+  //Make sure we didn't clobber our sentinel node
+  TEST_ASSERT_FALSE(lst->head == lst->head->next);
+  TEST_ASSERT_FALSE(lst->head == lst->head->prev);
+  TEST_ASSERT_TRUE(lst->head->data == NULL);
+  //Check to make sure our data actually made it into the node
+  TEST_ASSERT_TRUE(*((int *)lst->head->next->data) == 1);
+  TEST_ASSERT_TRUE(*((int *)lst->head->prev->data) == 1);
+  //Check for successful destruction
+  list_destroy(&lst);
+  TEST_ASSERT_TRUE(lst == NULL);
+}
+
+void test_add2_destroy(void)
+{
+  list_t *lst = NULL;
+  lst = list_init(destroy_data, compare_to);
+  list_add(lst, alloc_data(1));
+  TEST_ASSERT_TRUE(lst->size == 1);
+  list_add(lst, alloc_data(2));
+  TEST_ASSERT_TRUE(lst->size == 2);
+  //With two nodes both next and prev should NOT be equal
+  TEST_ASSERT_FALSE(lst->head->next == lst->head->prev);
+  TEST_ASSERT_TRUE(lst->head->next->next == lst->head->prev);
+  //Make sure we didn't clobber our sentinel node
+  TEST_ASSERT_FALSE(lst->head == lst->head->next);
+  TEST_ASSERT_FALSE(lst->head == lst->head->prev);
+  TEST_ASSERT_TRUE(lst->head->data == NULL);
+  //Check to make sure we have the correct data
+  TEST_ASSERT_TRUE(*((int *)lst->head->next->data) == 2);
+  TEST_ASSERT_TRUE(*((int *)lst->head->prev->data) == 1);
+  //Check for successful destruction
+  list_destroy(&lst);
+  TEST_ASSERT_TRUE(lst == NULL);
+}
 
 void test_removeIndex0(void)
 {
@@ -144,7 +206,6 @@ void test_removeIndex3(void)
     }
 }
 
-
 void test_removeIndex4(void)
 {
   populate_list();
@@ -168,11 +229,33 @@ void test_removeIndex4(void)
     }
 }
 
-
-void test_invaidIndex(void)
+void test_invaidIndexLarger(void)
 {
   populate_list();
   void *rval = list_remove_index(lst_, 666);
+  TEST_ASSERT_TRUE(rval == NULL);
+  TEST_ASSERT_TRUE(lst_->size == 5);
+
+  node_t *curr = lst_->head->next;
+  //List should be 4->3->2->1->0
+  for (int i = 4; i >= 0; i--)
+    {
+      TEST_ASSERT_TRUE(*((int *)curr->data) ==  i);
+      curr = curr->next;
+    }
+
+  for (int i = 0; i >= 4; i++)
+    {
+      TEST_ASSERT_TRUE(*((int *)curr->data) == i);
+      curr = curr->prev;
+    }
+}
+
+void test_invaidIndexNegative(void)
+{
+  populate_list();
+  // Expected to work because parameter expects an unsigned int
+  void *rval = list_remove_index(lst_, -1);
   TEST_ASSERT_TRUE(rval == NULL);
   TEST_ASSERT_TRUE(lst_->size == 5);
 
@@ -242,10 +325,14 @@ int main(void) {
   RUN_TEST(test_create_destroy);
   RUN_TEST(test_add1);
   RUN_TEST(test_add2);
+  RUN_TEST(test_add3);
+  RUN_TEST(test_add1_destroy);
+  RUN_TEST(test_add2_destroy);
   RUN_TEST(test_removeIndex0);
   RUN_TEST(test_removeIndex3);
   RUN_TEST(test_removeIndex4);
-  RUN_TEST(test_invaidIndex);
+  RUN_TEST(test_invaidIndexLarger);
+  RUN_TEST(test_invaidIndexNegative);
   RUN_TEST(test_removeAll);
   RUN_TEST(test_indexOf0);
   RUN_TEST(test_indexOf3);

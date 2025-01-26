@@ -21,7 +21,7 @@ list_t* list_init(void (*destroy_data)(void*), int (*compare_to)(const void*, co
 void list_destroy(list_t** ptr)
 {
     list_t* list = *ptr;
-    
+
     // Destroy all user-added nodes
     for(size_t i=0; i < list->size; i++) 
     {
@@ -38,12 +38,14 @@ list_t* list_add(list_t* list, void* data)
 {
     node_t* head = list->head;
     node_t* new = (node_t*)malloc(sizeof(*new));
+
     // Set references
     new->data = data;
     new->prev = head;
     new->next = head->next;
     head->next->prev = new;
     head->next = new;
+
     list->size++;
     return list;
 }
@@ -78,6 +80,7 @@ int list_indexof(list_t* list, void* data)
         index++;
         cur = cur->next;
     }
+    // If we're back at the sentinel node, then the data was not found
     if(cur->data == NULL) return -1;
     return index;
 }
