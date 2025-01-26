@@ -72,15 +72,6 @@ extern "C"
     void* list_remove_index(list_t* list, size_t index);
 
     /**
-     * @brief Removes a node and all its associated data from the list. Frees all
-     * memory allocated for the node.
-     * 
-     * @param node The node to remove
-     * @return void* The data that was removed of NULL if nothing was removed
-     */
-    void* list_remove_node(list_t*, node_t* node);
-
-    /**
      * @brief Search for any occurrence of data from the list.
      * Internally this function will call compare_to on each item in the list
      * until a match is found or the end of the list is reached. If there are

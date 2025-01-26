@@ -52,12 +52,10 @@ void test_create_destroy(void)
   //Make sure the function pointers are pointing to the correct fuctions
   TEST_ASSERT_TRUE(lst->destroy_data == destroy_data);
   TEST_ASSERT_TRUE(lst->compare_to == compare_to);
-
   //Make sure we are a circular linked list
   TEST_ASSERT_FALSE(lst->head->next == NULL);
   TEST_ASSERT_FALSE(lst->head->prev == NULL);
   TEST_ASSERT_TRUE(lst->head->next == lst->head->prev);
-
   list_destroy(&lst);
   TEST_ASSERT_TRUE(lst == NULL);
 }
@@ -73,7 +71,6 @@ void test_add1(void)
   TEST_ASSERT_FALSE(lst_->head == lst_->head->next);
   TEST_ASSERT_FALSE(lst_->head == lst_->head->prev);
   TEST_ASSERT_TRUE(lst_->head->data == NULL);
-
   //Check to make sure our data actually made it into the node
   TEST_ASSERT_TRUE(*((int *)lst_->head->next->data) == 1);
   TEST_ASSERT_TRUE(*((int *)lst_->head->prev->data) == 1);
@@ -85,14 +82,12 @@ void test_add2(void)
   TEST_ASSERT_TRUE(lst_->size == 1);
   list_add(lst_, alloc_data(2));
   TEST_ASSERT_TRUE(lst_->size == 2);
-
   //With two nodes both next and prev should NOT be equal
   TEST_ASSERT_FALSE(lst_->head->next == lst_->head->prev);
   //Make sure we didn't clobber our sentinel node
   TEST_ASSERT_FALSE(lst_->head == lst_->head->next);
   TEST_ASSERT_FALSE(lst_->head == lst_->head->prev);
   TEST_ASSERT_TRUE(lst_->head->data == NULL);
-
   //Check to make sure our next and prev have the correct data
   TEST_ASSERT_TRUE(*((int *)lst_->head->next->data) == 2);
   TEST_ASSERT_TRUE(*((int *)lst_->head->prev->data) == 1);
