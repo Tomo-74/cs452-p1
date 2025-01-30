@@ -1,37 +1,43 @@
 #include "lab.h"
-#include <stdio.h>
 
 list_t* list_init(void (*destroy_data)(void*), int (*compare_to)(const void*, const void*))
 {
-    list_t* list = (list_t*)malloc(sizeof(*list));
+    // Create empty list
+    list_t* list = (list_t*)malloc(sizeof(list_t)); // updated sizeof param
     list->destroy_data = destroy_data;
     list->compare_to = compare_to;
     list->size = 0;
 
     // Link sentinel node
-    node_t* head = (node_t*)malloc(sizeof(*head));
+    node_t* head = (node_t*)malloc(sizeof(node_t)); // updated sizeof param
+    head->data = NULL; // removed redundant dereferences
+    head->next = head;
+    head->prev = head;
     list->head = head;
-    list->head->data = NULL;
-    list->head->next = head;
-    list->head->prev = head;
 
     return list;
 }
 
-void list_destroy(list_t** ptr)
+void list_destroy(list_t** plist)
 {
-    list_t* list = *ptr;
+    if(plist == NULL) return; // added null check
+
+    list_t* list = *plist;
+    node_t* cur = list->head->next;
 
     // Destroy all user-added nodes
-    for(size_t i=0; i < list->size; i++) 
+    while(list->size > 0) // updated the deletion operation
     {
-        free(list_remove_index(list, i));
+        list->destroy_data(cur->data);
+        cur = cur->next;
+        free(cur->prev);
+        list->size--;
     }
 
     // Free sentinel and list
-    free((*ptr)->head);
-    free(*ptr);
-    *ptr = NULL;
+    free(list->head);
+    free(*plist);
+    *plist = NULL;
 }
 
 list_t* list_add(list_t* list, void* data)
@@ -45,8 +51,8 @@ list_t* list_add(list_t* list, void* data)
     new->next = head->next;
     head->next->prev = new;
     head->next = new;
-
     list->size++;
+
     return list;
 }
 
@@ -76,11 +82,11 @@ int list_indexof(list_t* list, void* data)
 
     // Traverse list and compare nodes
     node_t* cur = list->head->next;
-    while(cur->data != NULL && list->compare_to(cur->data, data)) {
+    while(cur != list->head) {
+        if(list->compare_to(cur->data, data) == 0) return index; // updated if statement condition
         index++;
         cur = cur->next;
     }
-    // If we're back at the sentinel node, then the data was not found
-    if(cur->data == NULL) return -1;
-    return index;
+
+    return -1;
 }
