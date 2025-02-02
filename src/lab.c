@@ -20,7 +20,7 @@ list_t* list_init(void (*destroy_data)(void*), int (*compare_to)(const void*, co
 
 void list_destroy(list_t** plist)
 {
-    if(plist == NULL) return; // added null check
+    if(!plist) return; // added null check
 
     list_t* list = *plist;
     node_t* cur = list->head->next;
@@ -42,6 +42,9 @@ void list_destroy(list_t** plist)
 
 list_t* list_add(list_t* list, void* data)
 {
+    if(!list) return NULL; // added param check
+    if(!data) return list;
+
     node_t* head = list->head;
     node_t* new = (node_t*)malloc(sizeof(*new));
 
@@ -58,7 +61,7 @@ list_t* list_add(list_t* list, void* data)
 
 void* list_remove_index(list_t* list, size_t index)
 {
-    if(index >= list->size) return NULL;
+    if(!list || index >= list->size) return NULL; // added null check
 
     // Find node to remove
     node_t* cur = list->head->next;
@@ -78,6 +81,8 @@ void* list_remove_index(list_t* list, size_t index)
 
 int list_indexof(list_t* list, void* data)
 {
+    if(!list) return -1; // added null check
+
     int index = 0;
 
     // Traverse list and compare nodes
